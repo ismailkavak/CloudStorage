@@ -3,6 +3,7 @@ package com.example.CloudStorage.service;
 import com.example.CloudStorage.dto.UserRegisterDto;
 import com.example.CloudStorage.dto.UserRegisterResponseDto;
 import com.example.CloudStorage.entity.UserEntity;
+import com.example.CloudStorage.exception.UserAlreadyExistsException;
 import com.example.CloudStorage.mapper.UserRegisterMapper;
 import com.example.CloudStorage.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,9 @@ public class UserService {
 
 
     public UserRegisterResponseDto saveUser(UserRegisterDto registerDto) {
+        if (userRepository.findByUsername(registerDto.getUsername()).isPresent()){
+            throw new UserAlreadyExistsException("This user already exist!");
+        }
         //DTO -> Entity
         UserEntity user = userRegisterMapper.toEntity(registerDto);
 

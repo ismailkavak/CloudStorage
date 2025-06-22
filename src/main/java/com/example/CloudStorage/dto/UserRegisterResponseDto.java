@@ -3,10 +3,11 @@ package com.example.CloudStorage.dto;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 public class UserRegisterResponseDto {
-    public Long id;
+    private UUID id;
     private String username;
     private String message;
 
