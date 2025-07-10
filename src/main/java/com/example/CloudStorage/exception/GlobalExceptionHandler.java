@@ -54,8 +54,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
-        System.out.println("Validation exception handler çalıştı!");
-
         // Collect all field errors
         List<String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)

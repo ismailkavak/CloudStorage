@@ -7,12 +7,13 @@ import com.example.CloudStorage.dto.UserRegisterResponseDto;
 import com.example.CloudStorage.entity.UserEntity;
 import com.example.CloudStorage.exception.InvalidCredentialsException;
 import com.example.CloudStorage.exception.UserAlreadyExistsException;
-import com.example.CloudStorage.exception.UserNotFoundException;
-import com.example.CloudStorage.exception.WrongPasswordException;
 import com.example.CloudStorage.mapper.UserRegisterMapper;
 import com.example.CloudStorage.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserRegisterMapper userRegisterMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
 
     public UserRegisterResponseDto saveUser(UserRegisterDto registerDto) {
         if (userRepository.findByUsername(registerDto.getUsername()).isPresent()){
@@ -42,17 +46,21 @@ public class UserService {
     }
 
     public UserLoginResponseDto loginUser(UserLoginDto userLoginDto){
-        UserEntity user = userRepository.findByUsername(userLoginDto.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+       try{
+           Authentication authenticate = authenticationManager.authenticate(
+                   new UsernamePasswordAuthenticationToken(
+                           userLoginDto.getUsername(),
+                           userLoginDto.getPassword()
+                   ));
 
-        //If login is non-success
-        if(!passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword())){
-            throw new InvalidCredentialsException("Invalid username or password!");
-        }
-        UserLoginResponseDto loginResponse = new UserLoginResponseDto();
-        loginResponse.setId(user.getId());
-        loginResponse.setUsername(user.getUsername());
-        loginResponse.setMessage("Login successful!");
-        return loginResponse;
+           if(!authenticate.isAuthenticated()){
+               throw new InvalidCredentialsException("Invalid username or password");
+           }else {
+                String token = jwtService.generateToken(userLoginDto.getUsername());
+               return new UserLoginResponseDto(token);
+           }
+       } catch (BadCredentialsException e) {
+           throw new InvalidCredentialsException("Invalid username or password!");
+       }
     }
 }
