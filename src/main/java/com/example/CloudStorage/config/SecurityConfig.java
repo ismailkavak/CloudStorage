@@ -37,8 +37,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // Diğer tüm endpoint'ler authentication gerektirir
                 )
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic auth'u devre dışı bırak
-                .formLogin(form -> form.disable())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Form login'i devre dışı bırak
+                .formLogin(form -> form.disable())// Form login'i devre dışı bırak
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
