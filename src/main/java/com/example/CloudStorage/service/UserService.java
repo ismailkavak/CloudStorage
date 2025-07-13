@@ -7,6 +7,7 @@ import com.example.CloudStorage.dto.UserRegisterResponseDto;
 import com.example.CloudStorage.entity.UserEntity;
 import com.example.CloudStorage.exception.InvalidCredentialsException;
 import com.example.CloudStorage.exception.UserAlreadyExistsException;
+import com.example.CloudStorage.exception.UserNotFoundException;
 import com.example.CloudStorage.mapper.UserRegisterMapper;
 import com.example.CloudStorage.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +65,10 @@ public class UserService {
        } catch (BadCredentialsException e) {
            throw new InvalidCredentialsException("Invalid username or password!");
        }
+    }
+
+    public UserEntity getUserById(String id){
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
     }
 }

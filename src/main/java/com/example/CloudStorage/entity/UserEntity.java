@@ -13,8 +13,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserEntity {
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    private String id;
 
     private String username;
     private String password;

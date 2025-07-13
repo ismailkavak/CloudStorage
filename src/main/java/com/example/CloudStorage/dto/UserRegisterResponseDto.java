@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 public class UserRegisterResponseDto {
-    private UUID id;
+    private String id;
     private String username;
     private String message;
 
