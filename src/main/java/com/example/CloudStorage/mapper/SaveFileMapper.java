@@ -5,6 +5,8 @@ import com.example.CloudStorage.dto.FileResponseDto;
 import com.example.CloudStorage.entity.UploadedFileEntity;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface SaveFileMapper {
     //DTO -> Entity
@@ -12,4 +14,7 @@ public interface SaveFileMapper {
 
     //Entity -> DTO
     FileResponseDto toResponseDto(UploadedFileEntity fileEntity);
+
+    //Entity -> Response DTO List
+    List<FileResponseDto> toDtoList(List<UploadedFileEntity> entities);
 }
