@@ -25,7 +25,7 @@ public class UploadedFileEntity {
     private Long size;
     private LocalDateTime uploadedAt;
 
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    //private UserEntity user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

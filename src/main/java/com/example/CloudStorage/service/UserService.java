@@ -29,7 +29,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-
     public UserRegisterResponseDto saveUser(UserRegisterDto registerDto) {
         if (userRepository.findByUsername(registerDto.getUsername()).isPresent()){
             throw new UserAlreadyExistsException("This user already exist!");
@@ -69,6 +68,11 @@ public class UserService {
 
     public UserEntity getUserById(String id){
         return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+    }
+
+    public UserEntity getUserByUsername(String username){
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
     }
 }
