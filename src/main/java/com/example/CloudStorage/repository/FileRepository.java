@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface FileRepository extends JpaRepository<UploadedFileEntity, String> {
     Optional<List<UploadedFileEntity>> findByUserId(String id);
+
+    Optional<UploadedFileEntity> findByStoredFileName(String storedFileName);
 }

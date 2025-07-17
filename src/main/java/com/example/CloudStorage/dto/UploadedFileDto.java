@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class FileDto {
+public class UploadedFileDto {
     private String id;
     private String originalFileName;
     private String storedFileName;
