@@ -18,7 +18,6 @@ import java.util.List;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class FileController {
     private final FileService fileService;
     private final UserService userService;
@@ -31,10 +30,10 @@ public class FileController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/download/{storedFileName}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String storedFileName, @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String id, @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
         String username = userDetails.getUsername();
-        return fileService.downloadFile(storedFileName, username);
+        return fileService.downloadFile(id, username);
     }
 
     @PostMapping("/upload")

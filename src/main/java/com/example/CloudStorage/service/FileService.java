@@ -1,5 +1,4 @@
 package com.example.CloudStorage.service;
-
 import com.example.CloudStorage.dto.UploadedFileDto;
 import com.example.CloudStorage.dto.FileResponseDto;
 import com.example.CloudStorage.entity.UploadedFileEntity;
@@ -16,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -40,7 +38,7 @@ public class FileService {
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
-        String storedFileName = UUID.randomUUID().toString() + "_" + multipartFile.getOriginalFilename();
+        String storedFileName = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
 
         Path filepath = Paths.get(uploadDirectory, storedFileName);
         Files.copy(multipartFile.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
@@ -62,11 +60,10 @@ public class FileService {
         return saveFileMapper.toDtoList(files);
     }
 
-    public ResponseEntity<Resource> downloadFile(String storedFileName, String username) throws IOException {
+    public ResponseEntity<Resource> downloadFile(String id, String username) throws IOException {
         // 1. Does the file exist in the database?
-        UploadedFileEntity file = fileRepository.findByStoredFileName(storedFileName)
+        UploadedFileEntity file = fileRepository.findById(id)
                 .orElseThrow(() -> new FileNotFoundException("File could not found."));
-
         // 2. Is the file belongs to that user?
         if (!file.getUser().getUsername().equals(username)) {
             throw new AccessDeniedException("You can not access this file!");
@@ -74,7 +71,7 @@ public class FileService {
 
         // 3. Is the file exist??
         // resolve() => combine paths like : uploadDirectory(/uploads) and storedFileName(/storedfilename) = /uploads/storedfilename
-        Path path = Paths.get(uploadDirectory).resolve(storedFileName);
+        Path path = Paths.get(uploadDirectory).resolve(file.getStoredFileName());
         if (!Files.exists(path)) {
             throw new FileNotFoundException("File could not found on the server.");
         }
