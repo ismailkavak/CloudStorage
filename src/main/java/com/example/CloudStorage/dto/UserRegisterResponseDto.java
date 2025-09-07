@@ -10,5 +10,4 @@ public class UserRegisterResponseDto {
     private String id;
     private String username;
     private String message;
-
 }

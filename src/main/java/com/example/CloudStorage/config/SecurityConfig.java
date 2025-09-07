@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable()) // CSRF'yi devre dışı bırak (REST API için)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/register", "/login").permitAll() // Bu endpoint'ler herkese açık
+                        .requestMatchers("/register", "/login", "/files/share/**").permitAll() // Bu endpoint'ler herkese açık
                         .anyRequest().authenticated() // Diğer tüm endpoint'ler authentication gerektirir
                 )
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic auth'u devre dışı bırak

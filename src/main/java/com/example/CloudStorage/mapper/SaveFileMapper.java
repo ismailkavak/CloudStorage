@@ -16,6 +16,8 @@ public interface SaveFileMapper {
     //Entity -> DTO
     UploadedFileDto toUploadedFileDto(UploadedFileEntity fileEntity);
 
+    FileResponseDto toResponseDto(UploadedFileEntity uploadedFileEntity);
+
     //Entity -> Response DTO List
     List<FileResponseDto> toDtoList(List<UploadedFileEntity> entities);
 }
