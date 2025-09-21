@@ -12,8 +12,6 @@ import com.example.CloudStorage.repository.FileRepository;
 import com.example.CloudStorage.repository.PrivateFileShareRepository;
 import com.example.CloudStorage.repository.PublicFileShareRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -26,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -95,6 +92,9 @@ public class FileService {
         // resolve() => combine paths like : uploadDirectory(/uploads) and storedFileName(/storedfilename) = /uploads/storedfilename
         Path path = Paths.get(uploadDirectory).resolve(file.getStoredFileName());
         if (!Files.exists(path)) {
+            System.out.println(path);
+            System.out.println(uploadDirectory);
+            System.out.println(file.getStoredFileName());
             throw new FileNotFoundException("File could not found on the server.");
         }
 
@@ -150,7 +150,9 @@ public class FileService {
        Path path = Paths.get("uploads").resolve(file.getStoredFileName());
 
        if(!Files.exists(path)){
-            throw new FileNotFoundException("File could not found on the server.");
+           System.out.println(path);
+           System.out.println(token);
+            throw new FileNotFoundException("File could not be found in the server.");
        }
 
        Resource resource = new UrlResource(path.toUri());
@@ -172,7 +174,7 @@ public class FileService {
         }
 
         UserEntity sharedByUser = userService.getUserById(sharedByUserId);
-        UserEntity sharedWithUser = userService.getUserById(privateFileShareRequestDto.getSharedWithUserId());
+        UserEntity sharedWithUser = userService.getUserByUsername(privateFileShareRequestDto.getSharedWithUsername());
 
         Optional<PrivateFileShareEntity> existingShare = privateFileShareRepository.findBySharedFileIdAndSharedWithId
                 (file.getId(), sharedWithUser.getId());
@@ -205,5 +207,13 @@ public class FileService {
         List<PrivateFileShareEntity> sentFiles = privateFileShareRepository.findBySharedById(id)
                 .orElseThrow(() -> new FileNotFoundException("File could not found!"));
         return ResponseEntity.ok(privateFileShareMapper.toResponseDtoList(sentFiles));
+    }
+
+
+    public void deleteFile(String fileId) {
+        UploadedFileEntity file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("Could not delete!"));
+
+        fileRepository.delete(file);
     }
 }

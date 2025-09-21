@@ -3,5 +3,5 @@ import lombok.Data;
 
 @Data
 public class PrivateFileShareRequestDto {
-    private String sharedWithUserId;
+    private String sharedWithUsername;
 }
