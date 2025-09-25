@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 @RestController
@@ -40,6 +41,12 @@ public class FileController {
     public ResponseEntity<Resource> downloadFile(@PathVariable String id, @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
         String username = userDetails.getUsername();
         return fileService.downloadFile(id, username);
+    }
+
+    @GetMapping("/presignDownload/{id}")
+    public ResponseEntity<URL> presignDownload(@PathVariable String id, @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
+        String username = userDetails.getUsername();
+        return fileService.downloadWithPresign(id, username);
     }
 
     @PostMapping("/upload")

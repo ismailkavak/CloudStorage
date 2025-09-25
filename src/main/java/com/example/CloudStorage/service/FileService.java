@@ -131,6 +131,21 @@ public class FileService {
                 .body(resource);
     }
 
+    public ResponseEntity<URL> downloadWithPresign(String id, String username) throws IOException{
+        UploadedFileEntity file = fileRepository.findById(id)
+                .orElseThrow(() -> new FileNotFoundException("File could not found."));
+
+        if (!file.getUser().getUsername().equals(username)){
+            throw new AccessDeniedException("You can not access this file!");
+        }
+
+        URL presignedUrl = s3Service.presignDownloadFile(file.getStoredFileName(), Duration.ofMinutes(30));
+
+        return ResponseEntity.ok(presignedUrl);
+    }
+
+
+
     public ResponseEntity<String> createPublicShareLink(String fileId, String userId) throws  IOException{
         UploadedFileEntity file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("File could not found."));
