@@ -29,7 +29,7 @@ public class JwtService {
                 .subject(username)
                 .issuer("poyraz")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60*10*10000))
+                .expiration(new Date(System.currentTimeMillis() + 60*10*1000000))
                 .signWith(generateKey())
                 .compact();
     }

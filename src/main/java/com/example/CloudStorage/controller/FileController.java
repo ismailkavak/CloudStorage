@@ -50,6 +50,14 @@ public class FileController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/presignUpload")
+    public ResponseEntity<UploadedFileDto> presignUploadFile(@RequestBody FileUploadRequestDto fileUploadRequestDto,@AuthenticationPrincipal CustomUserDetails userDetails){
+        String username = userDetails.getUsername();
+        UserEntity user = userService.getUserByUsername(username);
+        UploadedFileDto response = fileService.uploadFileWithPresign(fileUploadRequestDto, user);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/share/public/{fileId}")
     public ResponseEntity<String> createPublicShareLink(@PathVariable String fileId, @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         String username = userDetails.getUsername();

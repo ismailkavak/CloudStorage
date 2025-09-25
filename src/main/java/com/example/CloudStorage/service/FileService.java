@@ -13,6 +13,7 @@ import com.example.CloudStorage.repository.PrivateFileShareRepository;
 import com.example.CloudStorage.repository.PublicFileShareRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +41,7 @@ public class FileService {
     private final PublicFileShareMapper publicFileShareMapper;
     private final PrivateFileShareRepository privateFileShareRepository;
     private final PrivateFileShareMapper privateFileShareMapper;
+    private final S3Service s3Service;
 
     @Value("${file.upload.directory:uploads}")
     private String uploadDirectory;
@@ -62,8 +66,31 @@ public class FileService {
         uploadedFile.setUploadedAt(LocalDateTime.now());
         uploadedFile.setUser(user);
 
+        s3Service.uploadFile(multipartFile, storedFileName);
+
         UploadedFileEntity saved = fileRepository.save(uploadedFile);
         return saveFileMapper.toUploadedFileDto(saved);
+    }
+
+    public UploadedFileDto uploadFileWithPresign(FileUploadRequestDto fileUploadRequestDto,UserEntity user){
+
+        String storedFileName = UUID.randomUUID() + "_" + fileUploadRequestDto.getOriginalFileName();
+
+        UploadedFileEntity uploadedFile = new UploadedFileEntity();
+        uploadedFile.setOriginalFileName(fileUploadRequestDto.getOriginalFileName());
+        uploadedFile.setStoredFileName(storedFileName);
+        uploadedFile.setSize(fileUploadRequestDto.getSize());
+        uploadedFile.setUploadedAt(LocalDateTime.now());
+        uploadedFile.setUser(user);
+
+        URL presignURL = s3Service.presignedUploadFile(uploadedFile.getStoredFileName(), fileUploadRequestDto.getContentType(), Duration.ofMinutes(30));
+
+        UploadedFileEntity saved = fileRepository.save(uploadedFile);
+
+        UploadedFileDto uploadedFileDto = saveFileMapper.toUploadedFileDto(saved);
+        uploadedFileDto.setUrl(presignURL.toString());
+
+        return uploadedFileDto;
     }
 
     public List<FileResponseDto> getAllFilesByUser(String userId){
@@ -92,9 +119,6 @@ public class FileService {
         // resolve() => combine paths like : uploadDirectory(/uploads) and storedFileName(/storedfilename) = /uploads/storedfilename
         Path path = Paths.get(uploadDirectory).resolve(file.getStoredFileName());
         if (!Files.exists(path)) {
-            System.out.println(path);
-            System.out.println(uploadDirectory);
-            System.out.println(file.getStoredFileName());
             throw new FileNotFoundException("File could not found on the server.");
         }
 

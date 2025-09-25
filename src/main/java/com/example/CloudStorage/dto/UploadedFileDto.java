@@ -11,4 +11,5 @@ public class UploadedFileDto {
     private String storedFileName;
     private Long size;
     private LocalDateTime uploadedAt;
+    private String url;
 }
