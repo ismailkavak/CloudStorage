@@ -144,8 +144,6 @@ public class FileService {
         return ResponseEntity.ok(presignedUrl);
     }
 
-
-
     public ResponseEntity<String> createPublicShareLink(String fileId, String userId) throws  IOException{
         UploadedFileEntity file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("File could not found."));
@@ -168,13 +166,13 @@ public class FileService {
         PublicFileShareEntity savedEntity = publicFileShareRepository.save(publicFileShareEntity);
         PublicFileShareDto responseDto =  publicFileShareMapper.toPublicFileShareDto(savedEntity);
 
-        String baseUrl = "http://localhost:8080";
+        String baseUrl = "http://localhost:5173";
         responseDto.setShareUrl(baseUrl + "/files/share/" + savedEntity.getShareToken());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto.getShareUrl());
     }
 
-    public ResponseEntity<Resource> downloadFileByToken(String token) throws IOException{
+    public ResponseEntity<URL> downloadFileByToken(String token) throws IOException{
        PublicFileShareEntity shareEntity = publicFileShareRepository.findByShareToken(token)
                 .orElseThrow(() -> new FileNotFoundException("File could not found."));
 
@@ -186,21 +184,18 @@ public class FileService {
            throw new IllegalStateException("This link has expired!");
        }
 
-       Path path = Paths.get("uploads").resolve(file.getStoredFileName());
+       URL presignUrl = s3Service.presignDownloadFile(file.getStoredFileName(), Duration.ofMinutes(30));
 
-       if(!Files.exists(path)){
-           System.out.println(path);
-           System.out.println(token);
-            throw new FileNotFoundException("File could not be found in the server.");
-       }
+//       Path path = Paths.get("uploads").resolve(file.getStoredFileName());
 
-       Resource resource = new UrlResource(path.toUri());
-       String contentType = Files.probeContentType(path);
+//       if(!Files.exists(path)){
+//            throw new FileNotFoundException("File could not be found in the server.");
+//       }
 
-       return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType != null ? contentType : "application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getOriginalFileName() + "\"")
-                .body(resource);
+//       Resource resource = new UrlResource(path.toUri());
+//       String contentType = Files.probeContentType(path);
+
+       return ResponseEntity.ok().body(presignUrl);
     }
 
     public ResponseEntity<PrivateFileShareResponseDto> privateFileShare
@@ -248,11 +243,9 @@ public class FileService {
         return ResponseEntity.ok(privateFileShareMapper.toResponseDtoList(sentFiles));
     }
 
-
     public void deleteFile(String fileId) {
         UploadedFileEntity file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new IllegalArgumentException("Could not delete!"));
-
         fileRepository.delete(file);
     }
 }

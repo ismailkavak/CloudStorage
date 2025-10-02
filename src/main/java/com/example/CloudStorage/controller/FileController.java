@@ -74,7 +74,7 @@ public class FileController {
     }
 
     @GetMapping("/files/share/{token}")
-    public ResponseEntity<Resource> downloadFileByToken(@PathVariable String token) throws IOException{
+    public ResponseEntity<URL> downloadFileByToken(@PathVariable String token) throws IOException{
         return fileService.downloadFileByToken(token);
     }
 
